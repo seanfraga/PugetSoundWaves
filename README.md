@@ -1,6 +1,6 @@
 # Puget Sound Vessel Traffic Sonification
 
-This interactive site sonifies U.S. Customs District vessel traffic in Puget Sound (1851–1861), based on historical ledgers. It maps:
+This interactive site experiments with using data sonification to represent vessel traffic in Puget Sound (1851–1861), as recorded by the U.S. Customs District. The code for this project was written using ChatGPT. This site maps:
 
 - **Vessel type** → instrument sound
 - **Tonnage** → pitch (larger = deeper tone)
@@ -36,14 +36,6 @@ puget-sound-sonification/
 - [D3.js](https://d3js.org) for visualization
 - [Tone.js](https://tonejs.github.io) for sound synthesis
 - HTML5, CSS3 (responsive + accessible)
-
-## 🌐 Hosting on GitHub Pages
-
-To deploy:
-1. Create a new repository on GitHub
-2. Push this project’s contents to the main branch
-3. In GitHub settings, enable GitHub Pages from the `main` branch
-4. Visit `https://yourusername.github.io/your-repo-name/`
 
 ## 📌 To Do
 
