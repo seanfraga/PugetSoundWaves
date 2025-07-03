@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Puget Sound Vessel Sonification</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tone@next/build/Tone.js"></script>
+</head>
+<body>
+  <main>
+    <h1>Puget Sound Vessel Traffic (1851–1861)</h1>
+    <div id="controls">
+      <button id="play-btn">Play</button>
+      <button id="pause-btn">Pause</button>
+      <label for="speed">Speed:</label>
+      <select id="speed">
+        <option value="1">1x</option>
+        <option value="2">2x</option>
+        <option value="4">4x</option>
+      </select>
+    </div>
+    <svg id="plot" width="960" height="500"></svg>
+    <div id="tooltip" aria-hidden="true"></div>
+  </main>
+
+  <script>
+    const sampleData = [
+      { Date: "1851-11-15", Name: "Sea Nymph", Direction: "Inbound", Tonnage: 120, Type: "schooner" },
+      { Date: "1851-11-15", Name: "Columbia", Direction: "Outbound", Tonnage: 600, Type: "steamer" },
+      { Date: "1851-11-16", Name: "Ranger", Direction: "Inbound", Tonnage: 45, Type: "sloop" },
+      { Date: "1851-11-17", Name: "Neptune", Direction: "Outbound", Tonnage: 1300, Type: "ship" },
+      { Date: "1851-11-18", Name: "Eagle", Direction: "Inbound", Tonnage: 300, Type: "bark" },
+      { Date: "1851-11-18", Name: "Orion", Direction: "Outbound", Tonnage: 150, Type: "brig" },
+      { Date: "1851-11-18", Name: "Windward", Direction: "Inbound", Tonnage: 900, Type: "barkentine" }
+    ];
+  </script>
+  <script src="main.js"></script>
+</body>
+</html>
