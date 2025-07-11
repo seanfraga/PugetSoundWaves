@@ -12,6 +12,8 @@ function render() {
 
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
+  const allDates = Array.from(new Set(sampleData.map(d => +d.parsedDate))).sort((a, b) => a - b);
+
   // Scales
   const x = d3.scaleTime()
     .domain(d3.extent(sampleData, d => d.parsedDate))
@@ -69,24 +71,65 @@ function render() {
     .on("mouseout", hideTooltip)
     .on("click", d => playVesselSound(d));
 
+  // Add playback head
+  const playbackHead = g.append("line")
+    .attr("y1", 0)
+    .attr("y2", innerHeight)
+    .attr("stroke", "red")
+    .attr("stroke-width", 2)
+    .attr("x1", 0)
+    .attr("x2", 0)
+    .attr("cursor", "ew-resize")
+    .call(d3.drag()
+      .on("start", () => { isPlaying = false; })
+      .on("drag", (event) => {
+        const mouseX = event.x - margin.left;
+        const clampedX = Math.max(0, Math.min(innerWidth, mouseX));
+        playbackHead.attr("x1", clampedX).attr("x2", clampedX);
+      })
+      .on("end", (event) => {
+        const mouseX = event.x - margin.left;
+        const clampedX = Math.max(0, Math.min(innerWidth, mouseX));
+        const scrubDate = x.invert(clampedX);
+        const nearestDate = allDates.reduce((prev, curr) => {
+          return Math.abs(curr - scrubDate) < Math.abs(prev - scrubDate) ? curr : prev;
+        });
+        currentIndex = sampleData.findIndex(d => +d.parsedDate === nearestDate);
+        const scrubX = x(new Date(nearestDate));
+        playbackHead.attr("x1", scrubX).attr("x2", scrubX);
+      })
+    );
+
   // Tone.js playback
   function playVesselSound(d) {
-    const synth = new Tone.Synth().toDestination();
     const pan = d.Direction === "Inbound" ? -1 : 1;
     const panner = new Tone.Panner(pan).toDestination();
-    synth.connect(panner);
 
     const freq = d3.scaleLinear()
       .domain([2, 1500])
-      .range([880, 110])
+      .range([1760, 55])
       .clamp(true)(d.Tonnage);
 
-    synth.triggerAttackRelease(freq, "8n");
+    if (d.Type === "steamer") {
+      const metal = new Tone.MetalSynth({
+        frequency: freq,
+        envelope: { attack: 0.001, decay: 0.4, release: 0.2 },
+        harmonicity: 5.1,
+        modulationIndex: 32,
+        resonance: 4000,
+        octaves: 1.5
+      }).connect(panner);
+      metal.triggerAttackRelease("C4", "8n");
+    } else {
+      const synth = new Tone.Synth().toDestination();
+      synth.connect(panner);
+      synth.triggerAttackRelease(freq, "8n");
+    }
   }
 
   // Playback controls
   let isPlaying = false;
-  let playbackSpeed = 1;
+  let playbackDaysPerSecond = 1;
   let currentIndex = 0;
 
   const playBtn = document.getElementById("play-btn");
@@ -106,7 +149,7 @@ function render() {
   });
 
   speedSelect.addEventListener("change", e => {
-    playbackSpeed = +e.target.value;
+    playbackDaysPerSecond = +e.target.value;
   });
 
   async function playLoop() {
@@ -119,11 +162,15 @@ function render() {
       for (const vessel of todayVessels) {
         playVesselSound(vessel);
         await Tone.start();
-        await new Promise(r => setTimeout(r, 300 / playbackSpeed));
+        await new Promise(r => setTimeout(r, 300));
       }
 
+      // Move playback head
+      const headX = x(currentDate);
+      playbackHead.attr("x1", headX).attr("x2", headX);
+
       currentIndex += todayVessels.length;
-      await new Promise(r => setTimeout(r, 400 / playbackSpeed));
+      await new Promise(r => setTimeout(r, 1000 / playbackDaysPerSecond));
     }
   }
 }
